@@ -1,18 +1,14 @@
+import { help } from "../commands/help";
 import { stderr } from "./utils";
 
 type Args = string[];
 type Flags = string[][];
-type StdWriter = { highWaterMark: number | undefined };
 
 interface ICli {
   _pathToBun: string;
   _pathToExecutable: string;
   command: string;
   commands: Command[];
-  stderr: (
-    arg0: string,
-    options: { highWaterMark: number | undefined }
-  ) => void;
   run: (arg0?: string, arg1?: (...args: any) => any) => void;
 }
 
@@ -38,35 +34,10 @@ export class CLI implements ICli {
       .filter((flag) => flag.substring(0, 1) === "-")
       .filter(Boolean)
       .map((flag) => flag.split("="));
+
+    this.commands.push(new Command("help", help, "Displays a list of commands supported by mango"));
   }
 
-  /**
-   * Initializes a stdout writer start & end.
-   * @param input - Takes a string to write to the stdout & outputs it to console.
-   * @param options - Takes an object that matches the stdout.writer object.
-   * @returns void
-   */
-  stdout(input: string, options?: StdWriter): void {
-    const writer = Bun.stdout.writer(options);
-
-    writer.start();
-    writer.write(`${input}\n`);
-    writer.end();
-  }
-
-  /**
-   * Initializes a stderr writer start & end.
-   * @param input - Takes a string to write to the stderr & outputs it to console.
-   * @param options - Takes an object that matches the stderr.writer object.
-   * @returns void
-   */
-  stderr(input: string, options?: StdWriter): void {
-    const writer = Bun.stderr.writer(options);
-
-    writer.start();
-    writer.write(`${input}\n`);
-    writer.end();
-  }
 
   /**
    * Registers a command to an array of commands on the constructor.
@@ -85,12 +56,12 @@ export class CLI implements ICli {
    */
   run(): Command | this {
     if (this.command !== "mango") {
-      this.stderr(`Use "mango" to invoke mango actions.`);
+      stderr(`Use "mango" to invoke mango actions.`);
       return this;
     }
 
     if (this.commands.length === 0) {
-      this.stderr(
+      stderr(
         "No commands configured, register commands against the constructed class."
       );
       return this;
@@ -101,7 +72,7 @@ export class CLI implements ICli {
     );
 
     if (!command) {
-      this.stderr(`Command "${this.subcommand}": not found, or doesn't exist.`);
+      stderr(`Command "${this.subcommand}": not found, or doesn't exist.`);
       return this;
     }
 
@@ -126,7 +97,10 @@ export class Command {
     this.callback = callback;
     this.flags = [];
     this.requiredFlags = [];
-    this.flags.push(new Flag("help", "Shows useful information about this command", "h"));
+
+    if (this.command !== "help") {
+      this.flags.push(new Flag("help", "Shows useful information about this command", "h"));
+    }
   }
 
   public flag(flag: Flag): this {
