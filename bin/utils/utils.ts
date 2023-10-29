@@ -27,3 +27,9 @@ export function stdout(input: string, options?: StdWriter): void {
   writer.write(`${input}\n`);
   writer.end();
 }
+
+export function validateStorefrontURL(url: string): boolean {
+  const rgx = /[^.\s]+\.myshopify\.com/g;
+
+  return rgx.test(url);
+}
