@@ -126,6 +126,7 @@ export class Command {
     this.callback = callback;
     this.flags = [];
     this.requiredFlags = [];
+    this.flags.push(new Flag("help", "Shows useful information about this command", "h"));
   }
 
   public flag(flag: Flag): this {
@@ -167,7 +168,7 @@ export class Command {
     });
 
     mappedFlags?.forEach((searchFlag) => {
-      const foundFlag = this.flags.find((flag) => flag.flag === searchFlag);
+      const foundFlag = this.flags.find((flag) => flag.flag === searchFlag || flag.short === searchFlag);
       if (foundFlag === undefined) {
         invalidFlags.push(searchFlag);
       }
@@ -186,8 +187,11 @@ export class Command {
       stderr(`mango "${this.command}" requires: ${missingFlags.join(" ")}`);
       return this;
     }
+    const args = new Map();
 
-    return this.callback.call(caller);
+    flags?.map(([key, value]) => args.set(key.replace(/^-./g, ""), value));
+
+    return this.callback.call(caller, args);
   }
 }
 
@@ -206,7 +210,7 @@ export class Flag {
     this.flag = `--${flag}`;
     this.descriptor = descriptor;
 
-    this.short = short;
+    this.short = `-${short}`;
     this.required = required;
   }
 }
