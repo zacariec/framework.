@@ -1,11 +1,6 @@
-type Args = string[];
+import { Mango } from "./utils/cli";
 
 
-export function mango(args: Args) {
-  const [_pathToBun, _pathToExecutable, command] = args;
+const mango = new Mango(Bun.argv);
 
-  if (command !== "mango") {
-  }
-}
-
-mango(Bun.argv);
+mango.run();
