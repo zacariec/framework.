@@ -92,6 +92,7 @@ export async function create(this: CLI) {
     await Bun.write("template.zip", content);
 
     stdout("Unzipping theme");
+    // TODO: Add support for non OSX/Linux distros (windows lol)
     Bun.spawn(["unzip", "template.zip", "-d", directory]);
     stdout(fgBlue(`Finished unzipping theme template in: ${directory}`));
   } catch (err) {
