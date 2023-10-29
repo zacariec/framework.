@@ -13,6 +13,11 @@ interface ICLI {
   run: (arg0?: string, arg1?: (...args: any) => any) => void;
 }
 
+type CLILogger = Record<"stdout" | "stderr", (this: CLI, arg0: string) => any> | undefined;
+type InitArgs = {
+  args: Args,
+}
+
 export class CLI implements ICLI {
   args: Args;
   _pathToBun: string;
@@ -45,11 +50,13 @@ export class CLI implements ICLI {
     this.commands.push(new Command("help", help, "Displays a list of commands supported by mango"));
   }
 
-  public static async init(args: Args): Promise<CLI> {
+  public static async init({ args }: InitArgs): Promise<CLI> {
     try {
       const context = await readConfiguration();
+      const cli = new CLI(args, context);
 
-      return new CLI(args, context);
+      global.CLI = cli;
+      return cli;
     } catch (err) {
       stderr(`Error constructing CLI ${err}`);
       process.exit(0);
