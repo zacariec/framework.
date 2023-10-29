@@ -4,7 +4,7 @@ import { readConfiguration, stderr } from "./utils";
 
 import type { Args, ConfigRecord, Flags } from "../../types";
 
-interface ICli {
+interface ICLI {
   _pathToBun: string;
   _pathToExecutable: string;
   command: string;
@@ -13,11 +13,13 @@ interface ICli {
   run: (arg0?: string, arg1?: (...args: any) => any) => void;
 }
 
-export class CLI implements ICli {
+export class CLI implements ICLI {
   args: Args;
   _pathToBun: string;
   _pathToExecutable: string;
   command: string;
+  globalFlags: Flag[];
+  globalArgs: Map<string, string | boolean>;
   flags: Flags;
   commands: Command[];
   subcommand: string;
@@ -29,6 +31,8 @@ export class CLI implements ICli {
     this._pathToBun = this.args[0];
     this._pathToExecutable = this.args[1];
     this.context = context;
+    this.globalFlags = [];
+    this.globalArgs = new Map();
     this.command = this.args[2];
     this.commands = [];
     this.params = args.splice(3);
@@ -41,14 +45,20 @@ export class CLI implements ICli {
     this.commands.push(new Command("help", help, "Displays a list of commands supported by mango"));
   }
 
-  public static async init(args: Args) {
+  public static async init(args: Args): Promise<CLI> {
     try {
       const context = await readConfiguration();
 
       return new CLI(args, context);
     } catch (err) {
       stderr(`Error constructing CLI ${err}`);
+      process.exit(0);
     }
+  }
+
+  public globalFlag(flag: Flag): this {
+    this.globalFlags.push(flag);
+    return this;
   }
 
 
@@ -192,7 +202,9 @@ export class Command {
     // Checks for flags that don't exist agains the current Command context.
     mappedFlags?.forEach((searchFlag) => {
       const foundFlag = this.flags.find((flag) => flag.flag === searchFlag || flag.short === searchFlag);
-      if (foundFlag === undefined) {
+      const isGlobalFlag = caller.globalFlags.find((flag) => flag.flag === searchFlag || flag.short === searchFlag);
+
+      if (foundFlag === undefined && isGlobalFlag === undefined) {
         invalidFlags.push(searchFlag);
       }
     });
@@ -215,6 +227,9 @@ export class Command {
 
     const args = new Map();
 
+    // set global args
+    flags?.map(([key, value]) => caller.globalFlags.find((flag) => flag.flag === key && caller.globalArgs.set(key.replace(/^-./g, ""), (value === undefined ? true : value))));
+
     // Map the flags to the above args map for key & value replacing hyphens in the key.
     flags?.map(([key, value]) => args.set(key.replace(/^-./g, ""), (value === undefined ? true : value)));
 
@@ -223,6 +238,7 @@ export class Command {
       stderr(this.help());
       return this;
     }
+
 
     // executes the callback with context of the CLI, passing the optional arguments.
     return this.callback.call(caller, args);
