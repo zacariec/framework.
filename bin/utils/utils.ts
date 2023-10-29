@@ -1,6 +1,7 @@
 import { fgRed } from "./colors";
 
-type StdWriter = { highWaterMark: number | undefined };
+import type { ConfigRecord, StdWriter } from "../../types";
+
 
 /**
  * Initializes a stderr writer start & end.
@@ -34,4 +35,16 @@ export function validateStorefrontURL(url: string): boolean {
   const rgx = /[^.\s]+\.myshopify\.com/g;
 
   return rgx.test(url);
+}
+
+export async function readConfiguration(configPath = "mango.toml"): Promise<Map<string, ConfigRecord>> {
+  try {
+    const { default: file } = await import(`${process.cwd()}/${configPath}`);
+    const configurationMap: Map<string, ConfigRecord> = new Map(Object.entries(file));
+
+    return configurationMap;
+  } catch (err) {
+    stderr(`Error reading configuration file from ${configPath}. Does it even exist? ${err}`);
+    process.exit(0);
+  }
 }
