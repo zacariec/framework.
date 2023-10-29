@@ -1,3 +1,5 @@
+import { stderr } from "./utils";
+
 type Args = string[];
 type Flags = string[][];
 
@@ -116,7 +118,7 @@ export class Command {
 
 
     if (this.requiredFlags.length > 0 && mappedFlags !== undefined && mappedFlags.length === 0) {
-      CLI.prototype.stderr(`Required flag(s): "${this.requiredFlags.map((flag) => flag.flag).join(" ")}" ${this.requiredFlags.length > 1 ? "were" : "was"} not supplied and is marked as required`);
+      stderr(`Required flag(s): "${this.requiredFlags.map((flag) => flag.flag).join(" ")}" ${this.requiredFlags.length > 1 ? "were" : "was"} not supplied and is marked as required`);
       return this;
     }
 
@@ -134,16 +136,16 @@ export class Command {
     });
 
     if (invalidFlags.length !== 0) {
-      CLI.prototype.stderr(`Invalid flag(s): "${invalidFlags.join(" ")}" not required by mango "${this.command}"`);
+      stderr(`Invalid flag(s): "${invalidFlags.join(" ")}" not required by mango "${this.command}"`);
       return this;
     }
 
     if (missingFlags.length !== 0) {
-      CLI.prototype.stderr(`mango "${this.command}" requires: ${missingFlags.join(" ")}`);
+      stderr(`mango "${this.command}" requires: ${missingFlags.join(" ")}`);
       return this;
     }
 
-    return this.callback.call(this);
+    return this.callback.call(caller);
   }
 }
 
