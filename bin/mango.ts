@@ -3,7 +3,9 @@ import { create } from "./commands/create";
 import { watch } from "./commands/watch";
 import { Command, CLI, Flag } from "./utils/cli";
 
-const mango = await CLI.init(Bun.argv);
+const mango = await CLI.init({
+  args: Bun.argv,
+});
 
 if (!mango) {
   process.exit(0);
@@ -12,8 +14,6 @@ if (!mango) {
 mango.globalFlag(
   new Flag("environment", "Optional: The environment name to use instead of the default \"development\"", "e")
 );
-
-console.log(mango.globalFlags);
 
 const configCommand = new Command("config", configure, "")
     .flag(new Flag("themeid", "Required: The Storefront themeid for this environment", "t", true))
