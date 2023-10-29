@@ -80,7 +80,7 @@ export class CLI implements ICli {
       return this;
     }
 
-    return command.execute(this.flags);
+    return command.execute(this, this.flags);
   }
 }
 
@@ -109,7 +109,7 @@ export class Command {
     return this;
   }
 
-  public execute(flags?: Flags): this {
+  public execute(caller: CLI, flags?: Flags): Command {
     const mappedFlags = flags?.map(([flag, _value]) => flag);
     const missingFlags: string[] = [];
     const invalidFlags: string[] = [];
