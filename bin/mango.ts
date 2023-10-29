@@ -1,9 +1,9 @@
 import { configure } from "./commands/config";
 import { create } from "./commands/create";
+import { watch } from "./commands/watch";
 import { Command, CLI, Flag } from "./utils/cli";
 
-const mango = new CLI(Bun.argv);
-
+const mango = await CLI.init(Bun.argv);
 
 const configCommand = new Command("config", configure, "")
     .flag(new Flag("themeid", "Required: The Storefront themeid for this environment", "t", true))
@@ -13,11 +13,15 @@ const configCommand = new Command("config", configure, "")
     .flag(new Flag("environment", "Optional: The environment name to use instead of the default \"development\"", "e"))
     .flag(new Flag("directory", "Optional: The working directory to use instead of the default", "d"));
 
-const createCommand = new Command("create", create, "")
+const createCommand = new Command("create", create, "");
+const watchCommand = new Command("watch", watch, "");
 
+if (!mango) {
+  process.exit(0);
+}
 
 mango
-  .add(new Command("watch", () => null, ""))
+  .add(watchCommand)
   .add(createCommand)
   .add(configCommand);
 
