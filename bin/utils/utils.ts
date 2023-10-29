@@ -1,3 +1,5 @@
+import { fgRed } from "./colors";
+
 type StdWriter = { highWaterMark: number | undefined };
 
 /**
@@ -10,7 +12,7 @@ export function stderr(input: string, options?: StdWriter): void {
   const writer = Bun.stderr.writer(options);
 
   writer.start();
-  writer.write(`${input}\n`);
+  writer.write(fgRed(`${input}\n`));
   writer.end();
 }
 
