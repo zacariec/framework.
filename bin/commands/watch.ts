@@ -1,8 +1,11 @@
 import { FileChangeInfo, watch as fsWatch } from "fs/promises";
 
 import type { CLI } from "../utils/cli";
+import { createUpdateThemeAsset, deleteThemeAsset } from "../utils/shopify";
 
-export async function watch(this: CLI) {
+type WatchArgs = {};
+
+export async function watch(this: CLI, args: Map<keyof WatchArgs, WatchArgs[keyof WatchArgs]>) {
   // TODO: Map directory to context of CLI env.
   const parentDirectory = `${process.cwd()}/test`;
   const watcher = fsWatch(parentDirectory, {
@@ -10,7 +13,6 @@ export async function watch(this: CLI) {
   });
 
   for await (const event of watcher) {
-    console.log(event);
     switch (event.eventType) {
       case "rename":
         handleFileEventRename(event);
@@ -64,12 +66,15 @@ async function handleFileEventChange(
 
   if (bundleExtensions.includes(`.${fileExtension}`) === false) {
     // TODO: Upload the file to Shopify.
+    await createUpdateThemeAsset(fileName);
     return;
   }
 
   const bundle = await Bun.build({
     entrypoints: [filePath],
     target: "browser",
+    sourcemap: "inline",
+    minify: true,
   });
 
   console.log(bundle.success);
@@ -101,12 +106,14 @@ async function handleFileEventRename(
     if (fileExists === true) {
       console.log("Create file");
       // TODO: Create file on Shopify
+      await createUpdateThemeAsset(filePath);
       return;
     }
 
     if (fileExists === false) {
       console.log("Delete file");
       // TODO: Delete file on Shopify
+      await deleteThemeAsset(filePath);
       return;
     }
   } catch (err) {}
