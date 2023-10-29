@@ -103,6 +103,17 @@ export class Command {
     }
   }
 
+  /**
+    * Method to register a flag against the command.
+    * @param flag - The Flag constructor to add.
+    * @returns this - Returns the current Command.
+    * @example
+    * ```typescript
+    * // Adds a flag to a prexisting command.
+    * const myCommand = new Command(...);
+    * myCommand.flag(new Flag(...)); 
+    * ```
+    */
   public flag(flag: Flag): this {
     this.flags.push(flag);
 
@@ -113,7 +124,11 @@ export class Command {
     return this;
   }
 
-  public help() {
+  /**
+    * Gives information as a string about the current command.
+    * @returns string - Returns the help message to be printed about the current Command
+    */
+  private help(): string {
     return `
     ${this.description}
 
@@ -125,11 +140,18 @@ export class Command {
     `
   }
 
+  /**
+    * Executes the callback that was constructed with the new Command.
+    * @param caller CLI - The CLI instance that calls the command, provides access to the CLI context within the callback.
+    * @param flags optional string[][] - 2D Array of Iterator[key]:value these are the flags passed from the CLI to the command.
+    */
   public execute(caller: CLI, flags?: Flags): Command {
     const mappedFlags = flags?.map(([flag, _value]) => flag);
     const missingFlags: string[] = [];
     const invalidFlags: string[] = [];
 
+    // Early return if there are any required flags but no flags were passed down to the command.
+    // Checks if there are required flags in general but no flags were passed to the current Command context.
     if (
       this.requiredFlags.length > 0 &&
       mappedFlags !== undefined &&
@@ -145,6 +167,7 @@ export class Command {
       return this;
     }
 
+    // Checks for flags that are required but haven't been passed to the current Command context.
     this.requiredFlags.forEach((requiredFlag) => {
       if (
         mappedFlags?.find((flag) => requiredFlag.flag === flag) === undefined
@@ -153,6 +176,7 @@ export class Command {
       }
     });
 
+    // Checks for flags that don't exist agains the current Command context.
     mappedFlags?.forEach((searchFlag) => {
       const foundFlag = this.flags.find((flag) => flag.flag === searchFlag || flag.short === searchFlag);
       if (foundFlag === undefined) {
@@ -160,6 +184,7 @@ export class Command {
       }
     });
 
+    // Early return if flags that don't exist were passed to the current Command context.
     if (invalidFlags.length !== 0) {
       stderr(
         `Invalid flag(s): "${invalidFlags.join(" ")}" not required by mango "${
@@ -169,6 +194,7 @@ export class Command {
       return this;
     }
 
+    // Early return if flags were passed but still missing other required flags.
     if (missingFlags.length !== 0) {
       stderr(`mango "${this.command}" requires: ${missingFlags.join(" ")}`);
       return this;
@@ -176,13 +202,16 @@ export class Command {
 
     const args = new Map();
 
+    // Map the flags to the above args map for key & value replacing hyphens in the key.
     flags?.map(([key, value]) => args.set(key.replace(/^-./g, ""), (value === undefined ? true : value)));
 
+    // Early return if the help flag was passed to the current command context.
     if (args?.get("help") || args?.get("h")) {
       stderr(this.help());
       return this;
     }
 
+    // executes the callback with context of the CLI, passing the optional arguments.
     return this.callback.call(caller, args);
   }
 }
