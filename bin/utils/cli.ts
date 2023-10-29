@@ -1,5 +1,4 @@
 import { help } from "../commands/help";
-import { fgRed } from "./colors";
 import { readConfiguration, stderr } from "./utils";
 
 
