@@ -42,6 +42,8 @@ export async function readConfiguration(configPath = "mango.toml"): Promise<Map<
     const { default: file } = await import(`${process.cwd()}/${configPath}`);
     const configurationMap: Map<string, ConfigRecord> = new Map(Object.entries(file));
 
+    // TODO: Validate against schema - maybe valibot or our own version of validation?
+
     return configurationMap;
   } catch (err) {
     stderr(`Error reading configuration file from ${configPath}. Does it even exist? ${err}`);
