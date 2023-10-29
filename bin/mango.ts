@@ -5,6 +5,16 @@ import { Command, CLI, Flag } from "./utils/cli";
 
 const mango = await CLI.init(Bun.argv);
 
+if (!mango) {
+  process.exit(0);
+}
+
+mango.globalFlag(
+  new Flag("environment", "Optional: The environment name to use instead of the default \"development\"", "e")
+);
+
+console.log(mango.globalFlags);
+
 const configCommand = new Command("config", configure, "")
     .flag(new Flag("themeid", "Required: The Storefront themeid for this environment", "t", true))
     .flag(new Flag("storefront", "Required: The Storefront url for this environment eg: \"mystorefront.myshopify.com\"", "s", true))
@@ -14,11 +24,8 @@ const configCommand = new Command("config", configure, "")
     .flag(new Flag("directory", "Optional: The working directory to use instead of the default", "d"));
 
 const createCommand = new Command("create", create, "");
-const watchCommand = new Command("watch", watch, "");
+const watchCommand = new Command("watch", watch, "")
 
-if (!mango) {
-  process.exit(0);
-}
 
 mango
   .add(watchCommand)
