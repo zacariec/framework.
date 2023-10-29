@@ -68,6 +68,7 @@ ${isNewConfiguration === false ? await configFile.text() : ""}
 themeid = ${args.get("themeid")}
 storefront = "${args.get("storefront")}"
 password = "${args.get("password")}"
+api = "2023-10"
 ${args.get("ignores") !== undefined ? `ignores = "${args.get("ignores")}"` : ``}
 ${args.get("directory") !== undefined
         ? `directory = "${args.get("directory")}"`
