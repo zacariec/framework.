@@ -1,4 +1,4 @@
-import { fgRed } from "./colors";
+import { fgIntYellow, fgRed } from "./colors";
 
 import type { ConfigRecord, StdWriter } from "../../types";
 import { CLI } from "./cli";
@@ -12,9 +12,10 @@ import { CLI } from "./cli";
  */
 export function stderr(input: string, options?: StdWriter) {
   const writer = Bun.stderr.writer(options);
+  const environment = unwrapEnvironment();
 
   writer.start();
-  writer.write(fgRed(`${input}\n`));
+  writer.write(fgRed(`[${new Date().toLocaleTimeString()}] ${(!environment.name) ? "" : `[${environment.name}]`} ${input}\n`));
   writer.end();
 }
 
@@ -26,9 +27,10 @@ export function stderr(input: string, options?: StdWriter) {
  */
 export function stdout(input: string, options?: StdWriter): void {
   const writer = Bun.stdout.writer(options);
+  const environment = unwrapEnvironment();
 
   writer.start();
-  writer.write(`${input}\n`);
+  writer.write(`[${fgIntYellow(new Date().toLocaleTimeString())}] ${(!environment.name) ? "" : `[${environment.name}]`} ${input}\n`);
   writer.end();
 }
 
@@ -52,20 +54,12 @@ export async function readConfiguration(configPath = "mango.toml"): Promise<Map<
   }
 }
 
-export function unwrapEnvironment(): ConfigRecord {
+export function unwrapEnvironment(): { name: string | boolean | undefined, config: ConfigRecord | undefined } {
   const selectedEnvironment = global.CLI.globalArgs.get("environment");
-
-  if (!selectedEnvironment) {
-    stderr(``);
-    process.exit(0);
-  }
-
   const currentEnvironment = global.CLI.context?.get(String(selectedEnvironment));
 
-  if (!currentEnvironment) {
-    stderr(`Environment: ${selectedEnvironment} does not exist`);
-    process.exit(0)
-  }
-
-  return currentEnvironment;
+  return {
+    name: selectedEnvironment,
+    config: currentEnvironment,
+  };
 }
