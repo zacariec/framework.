@@ -1,14 +1,9 @@
 import { fgGreen } from "./colors";
-import { stderr, stdout } from "./utils";
+import { stderr, stdout, unwrapEnvironment } from "./utils";
 
-import type { CLI } from "./cli";
-
-export async function createUpdateThemeAsset(this: CLI, filename: string) {
-  const shopifyInstance = "";
-  const themeId = "";
-  const apiVersion = "";
+export async function createUpdateThemeAsset(filename: string) {
+  const environment = unwrapEnvironment();
   const fileContent = "";
-  const accessToken = "";
 
   const payload = {
     key: filename,
@@ -16,10 +11,10 @@ export async function createUpdateThemeAsset(this: CLI, filename: string) {
   };
 
   try {
-    const request = await fetch(`${shopifyInstance}/admin/api/${apiVersion}/themes/${themeId}/assets.json`, {
+    const request = await fetch(`https://${environment.storefront}/admin/api/${environment.api}/themes/${environment.themeid}/assets.json`, {
       method: "PUT",
       headers: {
-        "X-Shopify-Access-Token": accessToken,
+        "X-Shopify-Access-Token": environment.password,
         "Content-Type": "application/json",
       },
       body: JSON.stringify(payload),
@@ -38,18 +33,16 @@ export async function createUpdateThemeAsset(this: CLI, filename: string) {
   }
 }
 
-export async function deleteThemeAsset(this: CLI, filename: string): Promise<void> {
-  const shopifyInstance = "";
-  const themeId = "";
+export async function deleteThemeAsset(filename: string): Promise<void> {
+  const environment = unwrapEnvironment();
   const apiVersion = "";
-  const accessToken = "";
 
   try {
     // TODO: Get the actual asset key..
-    const request = await fetch(`${shopifyInstance}/admin/api/${apiVersion}/themes/${themeId}/assets.json?asset[key]=${filename}`, {
+    const request = await fetch(`https://${environment.storefront}/admin/api/${environment.api}/themes/${environment.themeid}/assets.json?asset[key]=${filename}`, {
       method: "DEL",
       headers: {
-        "X-Shopify-Access-Token": accessToken,
+        "X-Shopify-Access-Token": environment.password,
         "Content-Type": "application/json",
       },
     });
