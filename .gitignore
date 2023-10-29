@@ -171,3 +171,5 @@ dist
 .pnp.\*
 mango
 mango.toml
+.DS_Store
+template.zip
