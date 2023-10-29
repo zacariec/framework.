@@ -133,7 +133,7 @@ export class Command {
     ${this.description}
 
     Options
-      ${this.flags.map((flag) => `${flag.flag} ${flag.short}    ${flag.descriptor}`)}
+      ${this.flags.map((flag) => `${flag.flag} ${flag.short}    ${flag.descriptor}\n      `)}
 
     Usage
       $ mango ${this.command} [options]
@@ -195,7 +195,7 @@ export class Command {
     }
 
     // Early return if flags were passed but still missing other required flags.
-    if (missingFlags.length !== 0) {
+    if (missingFlags.length !== 0 && (mappedFlags?.includes("--help") || mappedFlags?.includes("--h")) === false) {
       stderr(`mango "${this.command}" requires: ${missingFlags.join(" ")}`);
       return this;
     }
