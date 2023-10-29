@@ -139,6 +139,18 @@ export class Command {
     return this;
   }
 
+  public help() {
+    return `
+    ${this.description}
+
+    Options
+      ${this.flags.map((flag) => `${flag.flag} ${flag.short}    ${flag.descriptor}`)}
+
+    Usage
+      $ mango ${this.command} [options]
+    `
+  }
+
   public execute(caller: CLI, flags?: Flags): Command {
     const mappedFlags = flags?.map(([flag, _value]) => flag);
     const missingFlags: string[] = [];
@@ -187,9 +199,15 @@ export class Command {
       stderr(`mango "${this.command}" requires: ${missingFlags.join(" ")}`);
       return this;
     }
+
     const args = new Map();
 
-    flags?.map(([key, value]) => args.set(key.replace(/^-./g, ""), value));
+    flags?.map(([key, value]) => args.set(key.replace(/^-./g, ""), (value === undefined ? true : value)));
+
+    if (args?.get("help") || args?.get("h")) {
+      stderr(this.help());
+      return this;
+    }
 
     return this.callback.call(caller, args);
   }
