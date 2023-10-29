@@ -40,7 +40,7 @@ export function validateStorefrontURL(url: string): boolean {
   return rgx.test(url);
 }
 
-export async function readConfiguration(configPath = "mango.toml"): Promise<Map<string, ConfigRecord>> {
+export async function readConfiguration(configPath = "framework.toml"): Promise<Map<string, ConfigRecord>> {
   try {
     const { default: file } = await import(`${process.cwd()}/${configPath}`);
     const configurationMap: Map<string, ConfigRecord> = new Map(Object.entries(file));

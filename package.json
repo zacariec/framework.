@@ -1,6 +1,6 @@
 {
-  "name": "mango",
-  "module": "bin/mango.ts",
+  "name": "framework",
+  "module": "bin/framework.ts",
   "type": "module",
   "devDependencies": {
     "bun-types": "latest"

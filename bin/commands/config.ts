@@ -18,7 +18,7 @@ export async function configure(
   this: CLI,
   args: Map<keyof Config, Config[keyof Config]>,
 ) {
-  const configPath = `${process.cwd()}/mango.toml`;
+  const configPath = `${process.cwd()}/framework.toml`;
   const configFile = Bun.file(configPath);
   const exists = await configFile.exists();
   let content = "";
@@ -87,7 +87,7 @@ ${args.get("directory") !== undefined
       `${args.get("environment") === undefined
         ? "development"
         : args.get("environment")
-      } environment already exists, please supply the --environment or -e flag to mango config`,
+      } environment already exists, please supply the --environment or -e flag to framework config`,
     );
   }
 }

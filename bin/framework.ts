@@ -3,15 +3,15 @@ import { create } from "./commands/create";
 import { watch } from "./commands/watch";
 import { Command, CLI, Flag } from "./utils/cli";
 
-const mango = await CLI.init({
+const framework = await CLI.init({
   args: Bun.argv,
 });
 
-if (!mango) {
+if (!framework) {
   process.exit(0);
 }
 
-mango.globalFlag(
+framework.globalFlag(
   new Flag("environment", "Optional: The environment name to use instead of the default \"development\"", "e")
 );
 
@@ -27,9 +27,9 @@ const createCommand = new Command("create", create, "");
 const watchCommand = new Command("watch", watch, "")
 
 
-mango
+framework
   .add(watchCommand)
   .add(createCommand)
   .add(configCommand);
 
-mango.run();
+framework.run();

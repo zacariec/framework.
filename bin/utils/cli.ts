@@ -47,7 +47,7 @@ export class CLI implements ICLI {
       .filter(Boolean)
       .map((flag) => flag.split("="));
 
-    this.commands.push(new Command("help", help, "Displays a list of commands supported by mango"));
+    this.commands.push(new Command("help", help, "Displays a list of commands supported by framework"));
   }
 
   public static async init({ args }: InitArgs): Promise<CLI> {
@@ -85,8 +85,8 @@ export class CLI implements ICLI {
    * @returns Command | Cli - returns the Command if found or the CLI instance - this is useless
    */
   public run(): Command | this {
-    if (this.command !== "mango") {
-      stderr(`Use "mango" to invoke mango actions.`);
+    if (this.command !== "framework") {
+      stderr(`Use "framework" to invoke framework actions.`);
       return this;
     }
 
@@ -166,7 +166,7 @@ export class Command {
       ${this.flags.map((flag) => `${flag.flag} ${flag.short}    ${flag.descriptor}\n      `)}
 
     Usage
-      $ mango ${this.command} [options]
+      $ framework ${this.command} [options]
     `
   }
 
@@ -219,7 +219,7 @@ export class Command {
     // Early return if flags that don't exist were passed to the current Command context.
     if (invalidFlags.length !== 0) {
       stderr(
-        `Invalid flag(s): "${invalidFlags.join(" ")}" not required by mango "${
+        `Invalid flag(s): "${invalidFlags.join(" ")}" not required by framework "${
           this.command
         }"`
       );
@@ -228,7 +228,7 @@ export class Command {
 
     // Early return if flags were passed but still missing other required flags.
     if (missingFlags.length !== 0 && (mappedFlags?.includes("--help") || mappedFlags?.includes("--h")) === false) {
-      stderr(`mango "${this.command}" requires: ${missingFlags.join(" ")}`);
+      stderr(`framework "${this.command}" requires: ${missingFlags.join(" ")}`);
       return this;
     }
 

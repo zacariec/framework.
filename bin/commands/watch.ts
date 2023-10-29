@@ -2,6 +2,7 @@ import { FileChangeInfo, watch as fsWatch } from "fs/promises";
 
 import type { CLI } from "../utils/cli";
 import { createUpdateThemeAsset, deleteThemeAsset } from "../utils/shopify";
+import { stdout } from "../utils/utils";
 
 type WatchArgs = {};
 
@@ -77,7 +78,8 @@ async function handleFileEventChange(
     minify: true,
   });
 
-  console.log(bundle.success);
+  stdout(`Parsing ${filePath}`);
+
 
   for (const log of bundle.logs) {
     switch (log.level) {
@@ -87,9 +89,10 @@ async function handleFileEventChange(
       case "debug":
       case "verbose":
     }
-    console.log(log.name, log.level, log.message, log.position);
   }
 
+
+  // TODO: Upload the bundle to Shopify.
   for (const result of bundle.outputs) {
     const txt = await result.text();
   }

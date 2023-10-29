@@ -9,7 +9,7 @@ import { fgBlue, fgYellow } from "../utils/colors";
 export async function create(this: CLI) {
   const directory = prompt(
     fgYellow(`What would you like to name your project?\n`),
-    `${process.cwd()}/my-mango-project`,
+    `${process.cwd()}/my-framework-project`,
   );
 
   if (directory === null) {
