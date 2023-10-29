@@ -44,7 +44,7 @@ export async function deleteThemeAsset(filename: string): Promise<void> {
   const environment = unwrapEnvironment();
 
   if (!environment.config) {
-    stderr(`Environment doesn't exist`);
+    stderr(`${environment.name} isn't a valid environment.`);
     process.exit(0);
   }
 
