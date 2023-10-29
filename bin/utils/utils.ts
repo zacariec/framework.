@@ -1,6 +1,7 @@
 import { fgRed } from "./colors";
 
 import type { ConfigRecord, StdWriter } from "../../types";
+import { CLI } from "./cli";
 
 
 /**
@@ -9,7 +10,7 @@ import type { ConfigRecord, StdWriter } from "../../types";
  * @param options - Takes an object that matches the stderr.writer object.
  * @returns void
  */
-export function stderr(input: string, options?: StdWriter): void {
+export function stderr(input: string, options?: StdWriter) {
   const writer = Bun.stderr.writer(options);
 
   writer.start();
@@ -49,4 +50,22 @@ export async function readConfiguration(configPath = "mango.toml"): Promise<Map<
     stderr(`Error reading configuration file from ${configPath}. Does it even exist? ${err}`);
     process.exit(0);
   }
+}
+
+export function unwrapEnvironment(): ConfigRecord {
+  const selectedEnvironment = global.CLI.globalArgs.get("environment");
+
+  if (!selectedEnvironment) {
+    stderr(``);
+    process.exit(0);
+  }
+
+  const currentEnvironment = global.CLI.context?.get(String(selectedEnvironment));
+
+  if (!currentEnvironment) {
+    stderr(`Environment: ${selectedEnvironment} does not exist`);
+    process.exit(0)
+  }
+
+  return currentEnvironment;
 }
