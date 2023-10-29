@@ -3,6 +3,12 @@ import { stderr, stdout, unwrapEnvironment } from "./utils";
 
 export async function createUpdateThemeAsset(filename: string) {
   const environment = unwrapEnvironment();
+
+  if (!environment.config) {
+    stderr(`Environment doesn't exist`);
+    process.exit(0);
+  }
+
   const fileContent = "";
 
   const payload = {
@@ -11,10 +17,11 @@ export async function createUpdateThemeAsset(filename: string) {
   };
 
   try {
-    const request = await fetch(`https://${environment.storefront}/admin/api/${environment.api}/themes/${environment.themeid}/assets.json`, {
+    const request = await fetch(`https://${environment.config.storefront}/admin/api/${environment.config.api}/themes/${environment.config.themeid}/assets.json`, {
       method: "PUT",
+      keepalive: false, // Bun.SH issue: https://github.com/oven-sh/bun/issues/3327
       headers: {
-        "X-Shopify-Access-Token": environment.password,
+        "X-Shopify-Access-Token": environment.config.password,
         "Content-Type": "application/json",
       },
       body: JSON.stringify(payload),
@@ -35,14 +42,19 @@ export async function createUpdateThemeAsset(filename: string) {
 
 export async function deleteThemeAsset(filename: string): Promise<void> {
   const environment = unwrapEnvironment();
-  const apiVersion = "";
+
+  if (!environment.config) {
+    stderr(`Environment doesn't exist`);
+    process.exit(0);
+  }
 
   try {
     // TODO: Get the actual asset key..
-    const request = await fetch(`https://${environment.storefront}/admin/api/${environment.api}/themes/${environment.themeid}/assets.json?asset[key]=${filename}`, {
+    const request = await fetch(`https://${environment.config.storefront}/admin/api/${environment.config.api}/themes/${environment.config.themeid}/assets.json?asset[key]=${filename}`, {
       method: "DEL",
+      keepalive: false, // Bun.SH issue: https://github.com/oven-sh/bun/issues/3327
       headers: {
-        "X-Shopify-Access-Token": environment.password,
+        "X-Shopify-Access-Token": environment.config.password,
         "Content-Type": "application/json",
       },
     });
