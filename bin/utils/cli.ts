@@ -1,14 +1,16 @@
 import { help } from "../commands/help";
-import { stderr } from "./utils";
+import { fgRed } from "./colors";
+import { readConfiguration, stderr } from "./utils";
 
-type Args = string[];
-type Flags = string[][];
+
+import type { Args, ConfigRecord, Flags } from "../../types";
 
 interface ICli {
   _pathToBun: string;
   _pathToExecutable: string;
   command: string;
   commands: Command[];
+  context: any;
   run: (arg0?: string, arg1?: (...args: any) => any) => void;
 }
 
@@ -20,12 +22,14 @@ export class CLI implements ICli {
   flags: Flags;
   commands: Command[];
   subcommand: string;
+  context: Map<string, ConfigRecord> | undefined;
   params: string[];
 
-  constructor(args: Args) {
+  private constructor(args: Args, context?: Map<string, ConfigRecord> | undefined) {
     this.args = args;
     this._pathToBun = this.args[0];
     this._pathToExecutable = this.args[1];
+    this.context = context;
     this.command = this.args[2];
     this.commands = [];
     this.params = args.splice(3);
@@ -38,13 +42,23 @@ export class CLI implements ICli {
     this.commands.push(new Command("help", help, "Displays a list of commands supported by mango"));
   }
 
+  public static async init(args: Args) {
+    try {
+      const context = await readConfiguration();
+
+      return new CLI(args, context);
+    } catch (err) {
+      stderr(`Error constructing CLI ${err}`);
+    }
+  }
+
 
   /**
    * Registers a command to an array of commands on the constructor.
    * @param command - The Command class to register
    * @returns this
    */
-  add(command: Command): this {
+  public add(command: Command): this {
     this.commands.push(command);
     return this;
   }
@@ -54,7 +68,7 @@ export class CLI implements ICli {
    * registered into the constructor.
    * @returns Command | Cli - returns the Command if found or the CLI instance - this is useless
    */
-  run(): Command | this {
+  public run(): Command | this {
     if (this.command !== "mango") {
       stderr(`Use "mango" to invoke mango actions.`);
       return this;
